@@ -135,9 +135,9 @@ pipeline {
                     }
                     post {
                         always {
-                            archiveArtifacts artifacts: 'week3/dev-ops/transfer-service/target/dependency-check-report.html', allowEmptyArchive: true
+                            archiveArtifacts artifacts: 'java-web-service/target/dependency-check-report.html', allowEmptyArchive: true
                             publishHTML(target: [
-                                reportDir: 'week3/dev-ops/transfer-service/target',
+                                reportDir: 'java-web-service/target',
                                 reportFiles: 'dependency-check-report.html',
                                 reportName: 'OWASP Dependency Report'
                             ])
