@@ -146,7 +146,36 @@ pipeline {
                 }
             }
         }
+        stage("🚀 Deploy to Nexus") {
+                    steps {
+                        input message: 'Do you want to deploy?', ok: 'Deploy'
+                        withCredentials([file(credentialsId: 'nexus-cred', variable: 'SETTINGS_XML')]) {
+                            script {
+                                def serviceDir = "week3/dev-ops/transfer-service"
+                                dir(serviceDir) {
+                                    retry(2) {
+                                        sh './mvnw deploy -DskipTests -s $SETTINGS_XML'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
+    post {
+        always {
+            echo "🧼 Cleaning workspace..."
+            cleanWs()
+        }
+        success {
+            echo "✅ Build #${BUILD_NUMBER} completed successfully."
+            // Optional: Enable Slack notification
+            // slackSend channel: '#ci-cd', message: "✅ transfer-service #${env.BUILD_NUMBER} passed"
+        }
+        failure {
+            echo "❌ Build #${BUILD_NUMBER} failed."
+            // slackSend channel: '#ci-cd', message: "❌ transfer-service #${env.BUILD_NUMBER} failed"
+        }
     }
-
 }
