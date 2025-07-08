@@ -146,20 +146,20 @@ pipeline {
             }
         }
         stage("🚀 Deploy to Nexus") {
-                    steps {
-                        input message: 'Do you want to deploy?', ok: 'Deploy'
-                        withCredentials([file(credentialsId: 'nexus-cred', variable: 'SETTINGS_XML')]) {
-                            script {
-                                def serviceDir = "week3/dev-ops/transfer-service"
-                                dir(serviceDir) {
-                                    retry(2) {
-                                        sh './mvnw deploy -DskipTests -s $SETTINGS_XML'
-                                    }
-                                }
+            steps {
+                input message: 'Do you want to deploy?', ok: 'Deploy'
+                withCredentials([file(credentialsId: 'nexus-cred', variable: 'SETTINGS_XML')]) {
+                    script {
+                        def serviceDir = "java-web-service"
+                        dir(serviceDir) {
+                            retry(2) {
+                                sh './mvnw deploy -DskipTests -s $SETTINGS_XML'
                             }
                         }
                     }
                 }
+            }
+        }
     }
 
     post {
