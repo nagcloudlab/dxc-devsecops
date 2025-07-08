@@ -1,8 +1,8 @@
 package com.example;
 
-public class CalculatorTest {
+class CalculatorTest {
 
-    private final Calculator calculator = new Calculator();
+    final Calculator calculator = new Calculator();
 
     @org.junit.jupiter.api.Test
     void testAdd() {

@@ -91,27 +91,6 @@ pipeline {
         }
         stage("🔍 Static Code Scans (Parallel)") {
             parallel {
-                stage("📦 OWASP Dependency Scan") {
-                    steps {
-                        script {
-                            def serviceDir = "java-web-service"
-                            dir(serviceDir) {
-                                // Fail build if vulnerabilities ≥ CVSS 7
-                                sh './mvnw org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=7'
-                            }
-                        }
-                    }
-                    post {
-                        always {
-                            archiveArtifacts artifacts: 'week3/dev-ops/transfer-service/target/dependency-check-report.html', allowEmptyArchive: true
-                            publishHTML(target: [
-                                reportDir: 'week3/dev-ops/transfer-service/target',
-                                reportFiles: 'dependency-check-report.html',
-                                reportName: 'OWASP Dependency Report'
-                            ])
-                        }
-                    }
-                }
                 stage("🕵️ Bytecode Scan (SpotBugs)") {
                     steps {
                         script {
@@ -141,6 +120,27 @@ pipeline {
                                     echo "❗ SpotBugs report not found."
                                 }
                             }
+                        }
+                    }
+                }
+                stage("📦 OWASP Dependency Scan") {
+                    steps {
+                        script {
+                            def serviceDir = "java-web-service"
+                            dir(serviceDir) {
+                                // Fail build if vulnerabilities ≥ CVSS 7
+                                sh './mvnw org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=7'
+                            }
+                        }
+                    }
+                    post {
+                        always {
+                            archiveArtifacts artifacts: 'week3/dev-ops/transfer-service/target/dependency-check-report.html', allowEmptyArchive: true
+                            publishHTML(target: [
+                                reportDir: 'week3/dev-ops/transfer-service/target',
+                                reportFiles: 'dependency-check-report.html',
+                                reportName: 'OWASP Dependency Report'
+                            ])
                         }
                     }
                 }
