@@ -53,7 +53,7 @@ pipeline {
         stage("🔐 SonarQube Static Code Scan") {
             steps {
                 script {
-                    def serviceDir = "week3/dev-ops/transfer-service"
+                    def serviceDir = "java-web-service"
                     dir(serviceDir) {
                         withSonarQubeEnv('SQ') {
                             echo '📡 Submitting code to SonarQube...'
