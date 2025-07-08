@@ -32,7 +32,7 @@ pipeline {
                 script {
                     def serviceDir = "java-web-service"
                     dir(serviceDir) {
-                        sh './mvnw test jacoco:report'
+                        sh './mvnw test'
                     }
                 }
             }
