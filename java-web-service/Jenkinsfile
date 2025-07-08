@@ -1,31 +1,60 @@
 pipeline {
+    
     agent any
 
-    stages {
-        stage('Build') {
-            steps {
-                echo 'Building...'
-                // Add your build steps here
-            }
-        }
-        stage('Test') {
-            steps {
-                echo 'Testing...'
-                // Add your test steps here
-            }
-        }
-        stage('Deploy') {
-            steps {
-                echo 'Deploying...'
-                // Add your deployment steps here
-            }
-        }
+    tools {
+        maven 'Maven 3.8.6' // Use Jenkins' global Maven installation
     }
 
-    post {
-        always {
-            echo 'Cleaning up...'
-            // Add cleanup steps here
-        }
+    environment {
+        SONAR_HOST_URL = "http://74.225.237.22:9000/"
+        SONAR_PROJECT_KEY = 'transfer-service'
+        SONAR_TOKEN = credentials('sonar-token')
+        MAVEN_OPTS = "-Dmaven.repo.local=.m2/repository" // Maven caching
     }
+
+    options {
+        timestamps()                     // Adds timestamps to console output
+        skipStagesAfterUnstable()       // Skips remaining stages if a stage is marked unstable
+    }
+
+    stages {
+
+         stage("📦 Compile") {
+            steps {
+                script {
+                    def serviceDir = "java-web-service"
+                    dir(serviceDir) {
+                        sh 'mvn compile'
+                    }
+                }
+            }
+        }
+        stage("🧪 Unit Test + Code Coverage") {
+            steps {
+                script {
+                    def serviceDir = "java-web-service"
+                    dir(serviceDir) {
+                        sh 'mvn test jacoco:report'
+                    }
+                }
+            }
+            post {
+                always {
+                    script {
+                        def reportPath = "java-web-service/target/surefire-reports"
+                        if (fileExists(reportPath)) {
+                            junit "${reportPath}/*.xml"
+                        } else {
+                            echo "❗ No test reports found."
+                        }
+                        // Publish Jacoco code coverage
+                        jacoco execPattern: '**/target/jacoco.exec'
+                    }
+                }
+            }
+        }
+
+    }
+
 }
