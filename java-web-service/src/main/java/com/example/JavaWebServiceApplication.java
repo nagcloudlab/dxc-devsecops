@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class JavaWebServiceApplication {
 
+	private static String password = "your_password_here";
+
 	@GetMapping("/hello")
 	public String hello() {
 		try {
@@ -20,6 +22,7 @@ public class JavaWebServiceApplication {
 	}
 
 	public static void main(String[] args) {
+		System.out.println("Starting Java Web Service with password: " + password);
 		SpringApplication.run(JavaWebServiceApplication.class, args);
 	}
 

@@ -75,6 +75,77 @@ pipeline {
                 }
             }
         }
+        stage("📦 Package Artifact") {
+            steps {
+                script {
+                    def serviceDir = "java-web-service"
+                    dir(serviceDir) {
+                        // Add build metadata for traceability
+                        sh "echo 'Build: ${BUILD_NUMBER}, Commit: \$(git rev-parse --short HEAD)' > src/main/resources/build-info.txt"
+                        retry(2) {
+                            sh './mvnw package -DskipTests'
+                        }
+                    }
+                }
+            }
+        }
+        stage("🔍 Static Code Scans (Parallel)") {
+            parallel {
+                stage("📦 OWASP Dependency Scan") {
+                    steps {
+                        script {
+                            def serviceDir = "java-web-service"
+                            dir(serviceDir) {
+                                // Fail build if vulnerabilities ≥ CVSS 7
+                                sh './mvnw org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=7'
+                            }
+                        }
+                    }
+                    post {
+                        always {
+                            archiveArtifacts artifacts: 'week3/dev-ops/transfer-service/target/dependency-check-report.html', allowEmptyArchive: true
+                            publishHTML(target: [
+                                reportDir: 'week3/dev-ops/transfer-service/target',
+                                reportFiles: 'dependency-check-report.html',
+                                reportName: 'OWASP Dependency Report'
+                            ])
+                        }
+                    }
+                }
+                stage("🕵️ Bytecode Scan (SpotBugs)") {
+                    steps {
+                        script {
+                            def serviceDir = "java-web-service"
+                            dir(serviceDir) {
+                                sh './mvnw spotbugs:spotbugs spotbugs:check'
+                            }
+                        }
+                    }
+                    post {
+                        always {
+                            script {
+                                def xml = 'java-web-service/target/spotbugsXml.xml'
+                                def html = 'java-web-service/target/spotbugs.html'
+
+                                if (fileExists(xml)) {
+                                    // Convert XML to HTML (requires xsltproc and spotbugs.xsl)
+                                    sh "xsltproc spotbugs.xsl ${xml} > ${html} || true"
+
+                                    archiveArtifacts artifacts: html, allowEmptyArchive: true
+                                    publishHTML(target: [
+                                        reportDir: 'java-web-service/target',
+                                        reportFiles: 'spotbugs.html',
+                                        reportName: 'Find Security Bugs Report'
+                                    ])
+                                } else {
+                                    echo "❗ SpotBugs report not found."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
     }
 
