@@ -25,7 +25,7 @@ public class JavaWebServiceApplication {
 	}
 
 	public static void main(String[] args) {
-		logger.info("Starting Java Web Service with password: " + password);
+		logger.info("Starting Java Web Service Application with password: {}", password);
 		SpringApplication.run(JavaWebServiceApplication.class, args);
 	}
 
