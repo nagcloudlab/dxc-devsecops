@@ -2,7 +2,6 @@ pipeline {
     
     agent any
 
-
     environment {
         SONAR_HOST_URL = "http://74.225.237.22:9000/"
         SONAR_PROJECT_KEY = 'transfer-service'
@@ -48,6 +47,31 @@ pipeline {
                         // Publish Jacoco code coverage
                         jacoco execPattern: '**/target/jacoco.exec'
                     }
+                }
+            }
+        }
+        stage("🔐 SonarQube Static Code Scan") {
+            steps {
+                script {
+                    def serviceDir = "week3/dev-ops/transfer-service"
+                    dir(serviceDir) {
+                        withSonarQubeEnv('SQ') {
+                            echo '📡 Submitting code to SonarQube...'
+                            sh """
+                                mvn verify sonar:sonar \
+                                    -Dsonar.projectKey=$SONAR_PROJECT_KEY \
+                                    -Dsonar.host.url=$SONAR_HOST_URL \
+                                    -Dsonar.login=$SONAR_TOKEN
+                            """
+                        }
+                    }
+                }
+            }
+        }
+        stage("🚦 Quality Gate Check") {
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
                 }
             }
         }
