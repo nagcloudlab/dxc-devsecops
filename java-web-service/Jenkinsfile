@@ -15,7 +15,6 @@ pipeline {
     }
 
     stages {
-
         stage("📦 Compile") {
             steps {
                 script {
@@ -161,7 +160,7 @@ pipeline {
                         }
                     }
                 }
-            }
+    }
 
     post {
         always {
