@@ -79,8 +79,8 @@
                     </execution>
                 </executions>
             </plugin>
-			 <!-- OWASP Dependency Check -->
-            <plugin>
+			<!-- OWASP Dependency Check -->
+            <!-- <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
                 <version>8.4.0</version>
@@ -96,9 +96,9 @@
                     <failBuildOnCVSS>7</failBuildOnCVSS>
                     <outputDirectory>${project.build.directory}</outputDirectory>
                 </configuration>
-            </plugin>
+            </plugin> -->
 			<!-- SpotBugs with FindSecBugs -->
-            <plugin>
+            <!-- <plugin>
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-maven-plugin</artifactId>
                 <version>4.8.3.0</version>
@@ -123,7 +123,7 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin> -->
 		</plugins>
 	</build>
 

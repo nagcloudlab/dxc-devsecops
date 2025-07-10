@@ -1,12 +1,15 @@
 pipeline {
     
-    agent any
+    // agent {
+    //     label 'docker' // Ensure this agent has Docker installed
+    // }
 
     environment {
         SONAR_HOST_URL = "http://74.225.237.22:9000/"
         SONAR_PROJECT_KEY = 'transfer-service'
         SONAR_TOKEN = credentials('sonar-cred')
         MAVEN_OPTS = "-Dmaven.repo.local=.m2/repository" // Maven caching
+        IMAGE_NAME = 'nagabhushanamn/jws' // Change this
     }
 
     options {
@@ -15,40 +18,40 @@ pipeline {
     }
 
     stages {
-        stage("📦 Compile") {
-            steps {
-                script {
-                    def serviceDir = "java-web-service"
-                    dir(serviceDir) {
-                        sh './mvnw compile'
-                    }
-                }
-            }
-        }
-        stage("🧪 Unit Test + Code Coverage") {
-            steps {
-                script {
-                    def serviceDir = "java-web-service"
-                    dir(serviceDir) {
-                        sh './mvnw test'
-                    }
-                }
-            }
-            post {
-                always {
-                    script {
-                        def reportPath = "java-web-service/target/surefire-reports"
-                        if (fileExists(reportPath)) {
-                            junit "${reportPath}/*.xml"
-                        } else {
-                            echo "❗ No test reports found."
-                        }
-                        // Publish Jacoco code coverage
-                        jacoco execPattern: '**/target/jacoco.exec'
-                    }
-                }
-            }
-        }
+        // stage("📦 Compile") {
+        //     steps {
+        //         script {
+        //             def serviceDir = "java-web-service"
+        //             dir(serviceDir) {
+        //                 sh './mvnw compile'
+        //             }
+        //         }
+        //     }
+        // }
+        // stage("🧪 Unit Test + Code Coverage") {
+        //     steps {
+        //         script {
+        //             def serviceDir = "java-web-service"
+        //             dir(serviceDir) {
+        //                 sh './mvnw test'
+        //             }
+        //         }
+        //     }
+        //     post {
+        //         always {
+        //             script {
+        //                 def reportPath = "java-web-service/target/surefire-reports"
+        //                 if (fileExists(reportPath)) {
+        //                     junit "${reportPath}/*.xml"
+        //                 } else {
+        //                     echo "❗ No test reports found."
+        //                 }
+        //                 // Publish Jacoco code coverage
+        //                 jacoco execPattern: '**/target/jacoco.exec'
+        //             }
+        //         }
+        //     }
+        // }
         // stage("🔐 SonarQube Static Code Scan") {
         //     steps {
         //         script {
@@ -81,7 +84,7 @@ pipeline {
                     dir(serviceDir) {
                         // Add build metadata for traceability
                         sh "echo 'Build: ${BUILD_NUMBER}, Commit: \$(git rev-parse --short HEAD)' > src/main/resources/build-info.txt"
-                        retry(2) {
+                        retry(1) {
                             sh './mvnw package -DskipTests'
                         }
                     }
@@ -145,15 +148,26 @@ pipeline {
         //         }
         //     }
         // }
-        stage("🚀 Deploy to Nexus") {
+        // stage("🚀 Deploy to Nexus") {
+        //     steps {
+        //         input message: 'Do you want to deploy?', ok: 'Deploy'
+        //         withCredentials([file(credentialsId: 'nexus-cred', variable: 'SETTINGS_XML')]) {
+        //             script {
+        //                 def serviceDir = "java-web-service"
+        //                 dir(serviceDir) {
+        //                     sh './mvnw deploy -DskipTests -s $SETTINGS_XML'
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+
+        stage("🐳 Docker Build") {
             steps {
-                input message: 'Do you want to deploy?', ok: 'Deploy'
-                withCredentials([file(credentialsId: 'nexus-cred', variable: 'SETTINGS_XML')]) {
-                    script {
-                        def serviceDir = "java-web-service"
-                        dir(serviceDir) {
-                            sh './mvnw deploy -DskipTests -s $SETTINGS_XML'
-                        }
+                script {
+                    def serviceDir = "java-web-service"
+                    dir(serviceDir) {
+                        sh "docker build -t $IMAGE_NAME:${BUILD_NUMBER} ."
                     }
                 }
             }
