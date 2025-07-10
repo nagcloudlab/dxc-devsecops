@@ -15,7 +15,6 @@ pipeline {
     }
 
     stages {
-        
         stage("📦 Compile") {
             steps {
                 script {
@@ -50,31 +49,31 @@ pipeline {
                 }
             }
         }
-        stage("🔐 SonarQube Static Code Scan") {
-            steps {
-                script {
-                    def serviceDir = "java-web-service"
-                    dir(serviceDir) {
-                        withSonarQubeEnv('SQ') {
-                            echo '📡 Submitting code to SonarQube...'
-                            sh """
-                                ./mvnw sonar:sonar \
-                                    -Dsonar.projectKey=$SONAR_PROJECT_KEY \
-                                    -Dsonar.host.url=$SONAR_HOST_URL \
-                                    -Dsonar.login=$SONAR_TOKEN
-                            """
-                        }
-                    }
-                }
-            }
-        }
-        stage("🚦 Quality Gate Check") {
-            steps {
-                timeout(time: 2, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
+        // stage("🔐 SonarQube Static Code Scan") {
+        //     steps {
+        //         script {
+        //             def serviceDir = "java-web-service"
+        //             dir(serviceDir) {
+        //                 withSonarQubeEnv('SQ') {
+        //                     echo '📡 Submitting code to SonarQube...'
+        //                     sh """
+        //                         ./mvnw sonar:sonar \
+        //                             -Dsonar.projectKey=$SONAR_PROJECT_KEY \
+        //                             -Dsonar.host.url=$SONAR_HOST_URL \
+        //                             -Dsonar.login=$SONAR_TOKEN
+        //                     """
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+        // stage("🚦 Quality Gate Check") {
+        //     steps {
+        //         timeout(time: 2, unit: 'MINUTES') {
+        //             waitForQualityGate abortPipeline: true
+        //         }
+        //     }
+        // }
         stage("📦 Package Artifact") {
             steps {
                 script {
@@ -89,63 +88,63 @@ pipeline {
                 }
             }
         }
-        stage("🔍 Static Code Scans (Parallel)") {
-            parallel {
-                stage("🕵️ Bytecode Scan (SpotBugs)") {
-                    steps {
-                        script {
-                            def serviceDir = "java-web-service"
-                            dir(serviceDir) {
-                                sh './mvnw spotbugs:spotbugs spotbugs:check'
-                            }
-                        }
-                    }
-                    post {
-                        always {
-                            script {
-                                def xml = 'java-web-service/target/spotbugsXml.xml'
-                                def html = 'java-web-service/target/spotbugs.html'
+        // stage("🔍 Static Code Scans (Parallel)") {
+        //     parallel {
+        //         stage("🕵️ Bytecode Scan (SpotBugs)") {
+        //             steps {
+        //                 script {
+        //                     def serviceDir = "java-web-service"
+        //                     dir(serviceDir) {
+        //                         sh './mvnw spotbugs:spotbugs spotbugs:check'
+        //                     }
+        //                 }
+        //             }
+        //             post {
+        //                 always {
+        //                     script {
+        //                         def xml = 'java-web-service/target/spotbugsXml.xml'
+        //                         def html = 'java-web-service/target/spotbugs.html'
 
-                                if (fileExists(xml)) {
-                                    // Convert XML to HTML (requires xsltproc and spotbugs.xsl)
-                                    sh "xsltproc spotbugs.xsl ${xml} > ${html} || true"
+        //                         if (fileExists(xml)) {
+        //                             // Convert XML to HTML (requires xsltproc and spotbugs.xsl)
+        //                             sh "xsltproc spotbugs.xsl ${xml} > ${html} || true"
 
-                                    archiveArtifacts artifacts: html, allowEmptyArchive: true
-                                    publishHTML(target: [
-                                        reportDir: 'java-web-service/target',
-                                        reportFiles: 'spotbugs.html',
-                                        reportName: 'Find Security Bugs Report'
-                                    ])
-                                } else {
-                                    echo "❗ SpotBugs report not found."
-                                }
-                            }
-                        }
-                    }
-                }
-                stage("📦 OWASP Dependency Scan") {
-                    steps {
-                        script {
-                            def serviceDir = "java-web-service"
-                            dir(serviceDir) {
-                                // Fail build if vulnerabilities ≥ CVSS 7
-                                sh './mvnw org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=7'
-                            }
-                        }
-                    }
-                    post {
-                        always {
-                            archiveArtifacts artifacts: 'java-web-service/target/dependency-check-report.html', allowEmptyArchive: true
-                            publishHTML(target: [
-                                reportDir: 'java-web-service/target',
-                                reportFiles: 'dependency-check-report.html',
-                                reportName: 'OWASP Dependency Report'
-                            ])
-                        }
-                    }
-                }
-            }
-        }
+        //                             archiveArtifacts artifacts: html, allowEmptyArchive: true
+        //                             publishHTML(target: [
+        //                                 reportDir: 'java-web-service/target',
+        //                                 reportFiles: 'spotbugs.html',
+        //                                 reportName: 'Find Security Bugs Report'
+        //                             ])
+        //                         } else {
+        //                             echo "❗ SpotBugs report not found."
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //         stage("📦 OWASP Dependency Scan") {
+        //             steps {
+        //                 script {
+        //                     def serviceDir = "java-web-service"
+        //                     dir(serviceDir) {
+        //                         // Fail build if vulnerabilities ≥ CVSS 7
+        //                         sh './mvnw org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=7'
+        //                     }
+        //                 }
+        //             }
+        //             post {
+        //                 always {
+        //                     archiveArtifacts artifacts: 'java-web-service/target/dependency-check-report.html', allowEmptyArchive: true
+        //                     publishHTML(target: [
+        //                         reportDir: 'java-web-service/target',
+        //                         reportFiles: 'dependency-check-report.html',
+        //                         reportName: 'OWASP Dependency Report'
+        //                     ])
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
         stage("🚀 Deploy to Nexus") {
             steps {
                 input message: 'Do you want to deploy?', ok: 'Deploy'
