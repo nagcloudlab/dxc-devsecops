@@ -5,7 +5,7 @@ pipeline {
     environment {
         SONAR_HOST_URL = "http://74.225.237.22:9000/"
         SONAR_PROJECT_KEY = 'transfer-service'
-        SONAR_TOKEN = credentials('sonar-token')
+        SONAR_TOKEN = credentials('sonar-cred')
         MAVEN_OPTS = "-Dmaven.repo.local=.m2/repository" // Maven caching
     }
 
@@ -15,6 +15,7 @@ pipeline {
     }
 
     stages {
+        
         stage("📦 Compile") {
             steps {
                 script {
@@ -152,9 +153,7 @@ pipeline {
                     script {
                         def serviceDir = "java-web-service"
                         dir(serviceDir) {
-                            retry(2) {
-                                sh './mvnw deploy -DskipTests -s $SETTINGS_XML'
-                            }
+                            sh './mvnw deploy -DskipTests -s $SETTINGS_XML'
                         }
                     }
                 }
