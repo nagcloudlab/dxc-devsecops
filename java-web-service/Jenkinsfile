@@ -1,4 +1,6 @@
 pipeline {
+
+    agent any // Use any available agent
     
     // agent {
     //     label 'docker' // Ensure this agent has Docker installed
