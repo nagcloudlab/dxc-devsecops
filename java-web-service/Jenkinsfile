@@ -204,7 +204,7 @@ pipeline {
                         // Ensure kubectl is configured to use the correct context
                         sh "kubectl apply -f k8s/jws-deployment.yaml"
                         sh "kubectl apply -f k8s/jws-service.yaml"
-                        sh "kubectl rollout status deployment/jws-deployment"
+                        sh "kubectl rollout status deployment/java-web-service-deployment"
                         echo "✅ Deployed to Kubernetes cluster successfully."
                     }
                 }

@@ -15,4 +15,4 @@ spec:
     spec:
       containers:
       - name: java-web-service
-        image: docker.io/nagabhushanam/java-web-service:latest
+        image: docker.io/nagabhushanamn/java-web-service:latest
