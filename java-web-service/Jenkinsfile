@@ -159,18 +159,16 @@ pipeline {
         //         }
         //     }
         // }
-
         stage("🐳 Docker Build") {
             steps {
                 script {
                     def serviceDir = "java-web-service"
                     dir(serviceDir) {
-                        sh "docker build -t $IMAGE_NAME:${BUILD_NUMBER} ."
+                        sh "docker build -t $IMAGE_NAME:latest ."
                     }
                 }
             }
         }
-
         // stage("🔍 Docker Image Scan") {
         //     steps {
         //         script {
@@ -188,17 +186,29 @@ pipeline {
         //         }
         //     }
         // }
-
         stage("🚀 Docker Push to Registry") {
             steps {
                 script {
-                    def imageTag = "$IMAGE_NAME:${BUILD_NUMBER}"
+                    def imageTag = "$IMAGE_NAME:latest"
                     sh "docker push ${imageTag}"
                     echo "✅ Pushed Docker images: ${imageTag} and latest"
                 }
             }
         }
-
+        // deploy into kubernetes cluster
+        stage("🚀 Deploy to Kubernetes") {
+            steps {
+                script {
+                    def serviceDir = "java-web-service"
+                    dir(serviceDir) {
+                        // Ensure kubectl is configured to use the correct context
+                        sh "kubectl apply -f k8s/jws-deployment.yaml"
+                        sh "kubectl apply -f k8s/jws-service.yaml"
+                        sh "kubectl rollout status deployment/jws-deployment"
+                        echo "✅ Deployed to Kubernetes cluster successfully."
+                    }
+                }
+            }
     }
 
     post {
