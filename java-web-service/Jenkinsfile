@@ -1,15 +1,11 @@
 pipeline {
 
     agent any // Use any available agent
-    
-    // agent {
-    //     label 'docker' // Ensure this agent has Docker installed
-    // }
 
     environment {
-        SONAR_HOST_URL = "http://74.225.237.22:9000/"
-        SONAR_PROJECT_KEY = 'transfer-service'
-        SONAR_TOKEN = credentials('sonar-cred')
+        // SONAR_HOST_URL = "http://74.225.237.22:9000/"
+        // SONAR_PROJECT_KEY = 'transfer-service'
+        // SONAR_TOKEN = credentials('sonar-cred')
         MAVEN_OPTS = "-Dmaven.repo.local=.m2/repository" // Maven caching
         IMAGE_NAME = 'nagabhushanamn/jws' // Change this
     }
