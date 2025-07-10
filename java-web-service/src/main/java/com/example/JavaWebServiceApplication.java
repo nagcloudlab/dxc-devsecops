@@ -18,7 +18,7 @@ public class JavaWebServiceApplication {
 	public String hello() {
 		try {
 			String hostName = java.net.InetAddress.getLocalHost().getHostName();
-			return "Hello from " + hostName + "!";
+			return "Helloooo from " + hostName + "!";
 		} catch (java.net.UnknownHostException e) {
 			return "Hello from an unknown host!";
 		}
