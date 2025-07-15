@@ -146,6 +146,7 @@ pipeline {
         //         }
         //     }
         // }
+        
         // stage("🚀 Deploy to Nexus") {
         //     steps {
         //         input message: 'Do you want to deploy?', ok: 'Deploy'
@@ -159,6 +160,10 @@ pipeline {
         //         }
         //     }
         // }
+
+        // copy jar production via scp
+        //....
+
         stage("🐳 Docker Build") {
             steps {
                 script {
@@ -212,7 +217,6 @@ pipeline {
             }
         }    
     }
-
     post {
         always {
             echo "🧼 Cleaning workspace..."
